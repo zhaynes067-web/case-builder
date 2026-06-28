@@ -1,0 +1,142 @@
+.case-frame {
+  display: flex;
+  border-style: none;
+  margin: 8px;
+  border-radius: 20px;
+  flex-direction: column;
+  width: 550px;
+  max-width: 100%;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  padding: 20px;
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  color: #1e293b !important;
+  border: 1px solid var(--modal-border, rgba(0, 0, 0, 0.08));
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.case-frame .text-content {
+  color: #1e293b;
+}
+
+.close-bar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 4px;
+}
+
+.close-bar button {
+  color: var(--modal-close-color, inherit);
+  opacity: 0.6;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.close-bar button:hover {
+  opacity: 1;
+  transform: rotate(90deg);
+}
+
+.case-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  color: inherit;
+  margin: 12px 8px;
+  user-select: none;
+  cursor: pointer;
+  position: relative;
+}
+
+.item-content-wrapper {
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.text-content {
+  margin: 0px;
+  padding: 0px;
+  pointer-events: auto;
+  text-align: center;
+  width: 100%;
+  min-width: 100%;
+  max-width: 100%;
+  font-size: 1.15rem;
+  line-height: 1.6;
+}
+
+.image-content {
+  margin: 0px;
+  padding: 0px;
+  pointer-events: none;
+  text-align: center;
+  width: 100%;
+  min-width: 100%;
+  max-width: 100%;
+}
+
+.video-content {
+  margin: 0px;
+  padding: 0px;
+  pointer-events: auto;
+  width: 100%;
+  min-width: 100%;
+  max-width: 100%;
+}
+
+.media-content {
+  margin: 0px;
+  padding: 0px;
+  width: 100%;
+  height: auto;
+  min-width: 100%;
+  max-width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+iframe.media-content, video.media-content {
+  aspect-ratio: 16 / 9;
+  height: auto;
+}
+
+@media (max-width: 600px) {
+  .case-frame {
+    margin: 0;
+    width: 100%;
+    border-radius: 0;
+    padding: 16px;
+  }
+}
+
+.link-content {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 16px 0 8px;
+}
+
+.viewer-link-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 600;
+  padding: 10px 24px;
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+.viewer-link-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+}
+
+/* ==========================================================================
+   THEMED MODAL FRAMES (Optional Customization)
+   ========================================================================== 
+   You can customize the styling of the .case-frame element by adding your own
+   classes or overriding CSS variables like --primary-color.
+*/

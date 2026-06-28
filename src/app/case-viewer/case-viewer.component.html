@@ -1,0 +1,65 @@
+<div class="case-frame" [ngClass]="theme || 'default'">
+  <div class="close-bar">
+    <button mat-icon-button (click)="close()" [attr.aria-label]="labels.close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  @for ( c of case.contents; track c; let i = $index) {
+    <div class="case-item">
+      @switch (c.type) {
+        @case ('text') {
+          <div class="text-content" [innerHTML]="getSanitizedContent(c.content)"></div>
+        }
+        @case ('image') {
+          <div class="image-content">
+            @if (c.content) {
+              <img [src]="getAbsoluteUrl(c.content)" [alt]="labels.noImage" class="media-content">
+            }
+            @if (!c.content) {
+              <span>{{ labels.noImage }}</span>
+            }
+          </div>
+        }
+        @case ('video') {
+          <div class="video-content">
+            @if (c.content) {
+              <video [src]="getAbsoluteUrl(c.content)" autoplay muted loop playsinline class="media-content">
+                {{ labels.videoNotSupported }}
+              </video>
+            }
+            @if (!c.content) {
+              <span>{{ labels.noVideo }}</span>
+            }
+          </div>
+        }
+        @case ('youtube') {
+          <div class="video-content">
+            @if (getSafeYoutubeUrl(c.content); as safeUrl) {
+              <iframe
+                [src]="safeUrl"
+                class="media-content"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen></iframe>
+            }
+            @if (!c.content) {
+              <span>{{ labels.noYouTube }}</span>
+            }
+          </div>
+        }
+        @case ('link') {
+          <div class="link-content">
+            @if (getLinkUrl(c.content); as url) {
+              <a [href]="url" target="_blank" mat-flat-button color="primary" class="viewer-link-button">
+                <mat-icon>open_in_new</mat-icon>
+                <span>{{ getLinkLabel(c.content) }}</span>
+              </a>
+            } @else {
+              <span>{{ labels.noLink }}</span>
+            }
+          </div>
+        }
+      }
+    </div>
+  }
+</div>
