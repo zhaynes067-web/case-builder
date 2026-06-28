@@ -1,0 +1,81 @@
+<div class="image-selector-card">
+  <!-- Tabs Header -->
+  <div class="tab-switcher">
+    <button type="button" class="tab-btn" [class.active]="activeTab === 'file'" (click)="selectTab('file')">
+      <mat-icon class="tab-icon">upload_file</mat-icon>
+      <span>{{ labels.uploadTab }}</span>
+    </button>
+    <button type="button" class="tab-btn" [class.active]="activeTab === 'url'" (click)="selectTab('url')">
+      <mat-icon class="tab-icon">link</mat-icon>
+      <span>{{ labels.urlTab }}</span>
+    </button>
+  </div>
+
+  <!-- Tabs Content -->
+  <div class="tab-content">
+    
+    <!-- File Tab -->
+    @if (activeTab === 'file') {
+      <div class="dropzone" 
+           [class.drag-over]="isDragOver"
+           (dragover)="onDragOver($event)"
+           (dragleave)="onDragLeave($event)"
+           (drop)="onDrop($event)"
+           (click)="fileInput.click()">
+        
+        <input #fileInput type="file" accept="image/*" (change)="onChange($event)" style="display: none;"/>
+        
+        @if (imageUrl && imageUrl !== '/pics/present.jpeg') {
+          <div class="preview-overlay-container" (click)="$event.stopPropagation()">
+            <img [src]="imageUrl" [alt]="labels.imagePreviewAlt" class="dropzone-preview"/>
+            <div class="preview-actions">
+              <button type="button" class="btn btn-primary" (click)="fileInput.click()">
+                <mat-icon>cached</mat-icon>
+                <span>{{ labels.loadPicture }}</span>
+              </button>
+              <button type="button" class="btn btn-danger" (click)="resetToDefault()">
+                <mat-icon>delete</mat-icon>
+                <span>{{ labels.clearImage }}</span>
+              </button>
+            </div>
+          </div>
+        } @else {
+          <div class="dropzone-placeholder">
+            <mat-icon class="upload-icon">cloud_upload</mat-icon>
+            <p class="dropzone-text">
+              {{ isDragOver ? labels.dropActive : labels.dropPrompt }}
+            </p>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- URL Tab -->
+    @if (activeTab === 'url') {
+      <div class="url-input-container">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ labels.enterUrl }}</mat-label>
+          <input [(ngModel)]="urlBox" 
+                 #imageInput 
+                 matInput 
+                 type="text" 
+                 (keydown.enter)="$event.preventDefault(); $event.stopPropagation()" 
+                 (ngModelChange)="onChangeImageUrl($event)">
+          <mat-icon matSuffix>link</mat-icon>
+          <mat-hint>{{ labels.urlHint }}</mat-hint>
+        </mat-form-field>
+
+        @if (displayPicture && imageUrl) {
+          <div class="url-preview-box">
+            <img [src]="imageUrl" [alt]="labels.imagePreviewAlt" class="url-preview-image"/>
+            @if (imageUrl !== '/pics/present.jpeg') {
+              <button type="button" class="reset-url-btn" (click)="resetToDefault()" [matTooltip]="labels.resetDefault">
+                <mat-icon>close</mat-icon>
+              </button>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,283 @@
+<div class="case-builder-container">
+  <!-- ======================================== -->
+  <!--      Barre d'actions supérieure         -->
+  <!-- ======================================== -->
+  <div class="top-action-bar">
+    <div class="toolbar-left-group">
+      <span class="toolbar-title">{{ labels.addBlocks }} :</span>
+      <div cdkDropList
+        id="toolbar-list"
+        [cdkDropListData]="['text', 'image', 'video', 'youtube', 'link']"
+        [cdkDropListConnectedTo]="['content-list']"
+        class="horizontal-toolbar-grid">
+        
+        <div class="library-item horizontal-library-item" cdkDrag [cdkDragData]="'text'" (click)="addBlock('text')">
+          <mat-icon class="library-item-icon">text_fields</mat-icon>
+          <span class="library-item-label">Texte</span>
+        </div>
+
+        <div class="library-item horizontal-library-item" cdkDrag [cdkDragData]="'image'" (click)="addBlock('image')">
+          <mat-icon class="library-item-icon">image</mat-icon>
+          <span class="library-item-label">Image</span>
+        </div>
+
+        <div class="library-item horizontal-library-item" cdkDrag [cdkDragData]="'video'" (click)="addBlock('video')">
+          <mat-icon class="library-item-icon">videocam</mat-icon>
+          <span class="library-item-label">Vidéo</span>
+        </div>
+
+        <div class="library-item horizontal-library-item" cdkDrag [cdkDragData]="'youtube'" (click)="addBlock('youtube')">
+          <mat-icon class="library-item-icon">smart_display</mat-icon>
+          <span class="library-item-label">YouTube</span>
+        </div>
+        
+        <div class="library-item horizontal-library-item" cdkDrag [cdkDragData]="'link'" (click)="addBlock('link')">
+          <mat-icon class="library-item-icon">link</mat-icon>
+          <span class="library-item-label">Bouton</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="spacer"></div>
+
+    <button type="button" mat-stroked-button (click)="clickResetIcon()" [matTooltip]="labels.resetTooltip">
+      <mat-icon>refresh</mat-icon>
+      <span>{{ labels.reset }}</span>
+    </button>
+  </div>
+
+  <!-- ======================================== -->
+  <!--      Zone de travail principale         -->
+  <!-- ======================================== -->
+  <div class="main-content-area">
+
+    <!-- Colonne Gauche : Aperçu Classique -->
+    <div class="canvas-column">
+      <div class="classic-case-preview" [style.border-color]="case.color || '#3b82f6'">
+        <!-- En-tête de la case classique -->
+        <div class="classic-case-header">
+          <div class="classic-case-title-row">
+            <mat-icon class="classic-case-icon">card_giftcard</mat-icon>
+            <span class="classic-case-date-title">{{ date ? date : 'Surprise du jour' }}</span>
+          </div>
+          <span class="classic-case-badge">Aperçu</span>
+        </div>
+
+        <!-- Zone de défilement du contenu du calendrier -->
+        <div cdkDropList
+          id="content-list"
+          [cdkDropListData]="case.contents"
+          class="case-frame"
+          (cdkDropListDropped)="onBlockDropped($event)">
+
+          <!-- État vide : quand il n'y a aucun contenu -->
+          @if (!case.contents || case.contents.length === 0) {
+            <div class="empty-list-state">
+              <mat-icon>add_to_photos</mat-icon>
+              <span>{{ labels.dragPrompt }}</span>
+            </div>
+          }
+
+          <!-- Premier bouton "+" d'insertion inline (quand il y a du contenu) -->
+          @if (case.contents && case.contents.length > 0) {
+            <div class="inline-insert-zone first-insert">
+              <button type="button" mat-mini-fab class="inline-insert-btn" [matTooltip]="labels.insertHere">
+                <mat-icon>add</mat-icon>
+              </button>
+              <div class="inline-insert-menu">
+                <button type="button" mat-icon-button class="insert-type-btn text" (click)="addBlock('text', 0)" [matTooltip]="labels.addTextTooltip">
+                  <mat-icon>text_fields</mat-icon>
+                </button>
+                <button type="button" mat-icon-button class="insert-type-btn image" (click)="addBlock('image', 0)" [matTooltip]="labels.addImageTooltip">
+                  <mat-icon>image</mat-icon>
+                </button>
+                <button type="button" mat-icon-button class="insert-type-btn video" (click)="addBlock('video', 0)" [matTooltip]="labels.addVideoTooltip">
+                  <mat-icon>videocam</mat-icon>
+                </button>
+                <button type="button" mat-icon-button class="insert-type-btn youtube" (click)="addBlock('youtube', 0)" [matTooltip]="labels.addYoutubeTooltip">
+                  <mat-icon>smart_display</mat-icon>
+                </button>
+                <button type="button" mat-icon-button class="insert-type-btn link" (click)="addBlock('link', 0)" [matTooltip]="labels.addLinkTooltip">
+                  <mat-icon>link</mat-icon>
+                </button>
+              </div>
+            </div>
+          }
+
+          <!-- Liste des blocs de contenu -->
+          @for (c of case.contents; track c; let i = $index) {
+            <div class="case-item-container" cdkDrag>
+              
+              <div class="case-item"
+                [class.selected]="selectedCaseIndex === i"
+                (click)="selectCase(i)">
+                
+                <!-- Poignée de déplacement -->
+                <mat-icon cdkDragHandle class="drag-handle" (click)="$event.stopPropagation()">drag_indicator</mat-icon>
+
+                <!-- Badge indiquant le type de bloc -->
+                <span class="block-badge" [class]="c.type">{{ c.type | uppercase }}</span>
+
+                <!-- Contenu du bloc -->
+                <div class="item-content-wrapper">
+                  @if (selectedCaseIndex === i) {
+                    <div class="inline-editor-container" (click)="$event.stopPropagation()">
+                      @switch (c.type) {
+                        @case ('text') {
+                          @defer (on idle) {
+                            <quill-editor
+                              [(ngModel)]="editorHtml"
+                              [modules]="quillModules"
+                              (onContentChanged)="onEditorContentChange($event.html)"
+                              [placeholder]="labels.editorPlaceholder"
+                            ></quill-editor>
+                          } @placeholder {
+                            <div class="quill-editor-placeholder" style="padding: 20px; text-align: center; border: 1px dashed var(--border-color, #ccc); border-radius: 4px;">
+                              <span>{{ labels.loadingEditor }}</span>
+                            </div>
+                          }
+                        }
+                        @case ('image') {
+                          <app-image-selector
+                            [displayPicture]="false"
+                            [initialImageUrl]="c.content || '/pics/present.jpeg'"
+                            (imageSelected)="onImageSelected($event)"></app-image-selector>
+                        }
+                        @case ('video') {
+                          <mat-form-field appearance="fill" class="full-width">
+                            <mat-label>{{ labels.videoUrlLabel }}</mat-label>
+                            <input matInput type="text" [value]="videoUrl" (keydown.enter)="$event.preventDefault(); $event.stopPropagation()" (change)="onChangeVideoUrl($event)">
+                          </mat-form-field>
+                        }
+                        @case ('youtube') {
+                          <mat-form-field appearance="fill" class="full-width">
+                            <mat-label>{{ labels.youtubeUrlLabel }}</mat-label>
+                            <input matInput type="text" [value]="youtubeUrl" (keydown.enter)="$event.preventDefault(); $event.stopPropagation()" (change)="onChangeYoutubeUrl($event)">
+                            <mat-hint>{{ labels.youtubeHint }}</mat-hint>
+                          </mat-form-field>
+                        }
+                        @case ('link') {
+                          <mat-form-field appearance="fill" class="full-width">
+                            <mat-label>{{ labels.linkLabelLabel }}</mat-label>
+                            <input matInput type="text" [value]="linkLabel" (keydown.enter)="$event.preventDefault(); $event.stopPropagation()" (change)="onChangeLinkLabel($event)" [placeholder]="labels.linkLabelPlaceholder">
+                          </mat-form-field>
+                          <mat-form-field appearance="fill" class="full-width">
+                            <mat-label>{{ labels.linkUrlLabel }}</mat-label>
+                            <input matInput type="text" [value]="linkUrl" (keydown.enter)="$event.preventDefault(); $event.stopPropagation()" (change)="onChangeLinkUrl($event)" [placeholder]="labels.linkUrlPlaceholder">
+                          </mat-form-field>
+                        }
+                      }
+                    </div>
+                  } @else {
+                    @switch (c.type) {
+                      @case ('text') {
+                        <div class="text-content" [innerHTML]="getSanitizedContent(c.content)"></div>
+                      }
+                      @case ('image') {
+                        <div class="image-content">
+                          @if (c.content) {
+                            <img [src]="c.content" [alt]="labels.imagePreviewAlt" class="media-content">
+                          } @else {
+                            <div class="empty-media-placeholder">
+                              <mat-icon>image</mat-icon>
+                              <span>{{ labels.noImage }}</span>
+                            </div>
+                          }
+                        </div>
+                      }
+                      @case ('video') {
+                        <div class="video-content">
+                          @if (c.content) {
+                            <video [src]="c.content" controls class="media-content">
+                              {{ labels.videoNotSupported }}
+                            </video>
+                          } @else {
+                            <div class="empty-media-placeholder">
+                              <mat-icon>videocam</mat-icon>
+                              <span>{{ labels.noVideo }}</span>
+                            </div>
+                          }
+                        </div>
+                      }
+                      @case ('youtube') {
+                        <div class="video-content">
+                          @if (getSafeYoutubeUrl(c.content); as safeUrl) {
+                            <iframe
+                              [src]="safeUrl"
+                              class="media-content"
+                              frameborder="0"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowfullscreen></iframe>
+                          } @else {
+                            <div class="empty-media-placeholder">
+                              <mat-icon>smart_display</mat-icon>
+                              <span>{{ labels.noYouTube }}</span>
+                            </div>
+                          }
+                        </div>
+                      }
+                      @case ('link') {
+                        <div class="link-content">
+                          @if (getLinkUrl(c.content); as url) {
+                            <a [href]="url" target="_blank" mat-flat-button color="primary" class="preview-link-button" (click)="$event.stopPropagation()">
+                              <mat-icon>open_in_new</mat-icon>
+                              <span>{{ getLinkLabel(c.content) }}</span>
+                            </a>
+                          } @else {
+                            <div class="empty-media-placeholder">
+                              <mat-icon>link</mat-icon>
+                              <span>{{ labels.noLink }}</span>
+                            </div>
+                          }
+                        </div>
+                      }
+                    }
+                  }
+                </div>
+
+                <!-- Actions au survol de l'élément (boutons de déplacement manuel et suppression) -->
+                <div class="item-hover-actions">
+                  <button type="button" mat-icon-button class="item-action-btn" [disabled]="i === 0" (click)="moveBlock(i, 'up'); $event.stopPropagation()" [matTooltip]="labels.moveUp">
+                    <mat-icon>arrow_upward</mat-icon>
+                  </button>
+                  <button type="button" mat-icon-button class="item-action-btn" [disabled]="i === case.contents.length - 1" (click)="moveBlock(i, 'down'); $event.stopPropagation()" [matTooltip]="labels.moveDown">
+                    <mat-icon>arrow_downward</mat-icon>
+                  </button>
+                  <button type="button" mat-icon-button class="item-action-btn delete-btn" (click)="clickDeleteIcon(i); $event.stopPropagation()" [matTooltip]="labels.deleteBlockTooltip">
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Bouton "+" d'insertion inline après chaque élément (index i+1) -->
+              <div class="inline-insert-zone">
+                <button type="button" mat-mini-fab class="inline-insert-btn" [matTooltip]="labels.insertHere">
+                  <mat-icon>add</mat-icon>
+                </button>
+                <div class="inline-insert-menu">
+                  <button type="button" mat-icon-button class="insert-type-btn text" (click)="addBlock('text', i + 1)" [matTooltip]="labels.addTextTooltip">
+                    <mat-icon>text_fields</mat-icon>
+                  </button>
+                  <button type="button" mat-icon-button class="insert-type-btn image" (click)="addBlock('image', i + 1)" [matTooltip]="labels.addImageTooltip">
+                    <mat-icon>image</mat-icon>
+                  </button>
+                  <button type="button" mat-icon-button class="insert-type-btn video" (click)="addBlock('video', i + 1)" [matTooltip]="labels.addVideoTooltip">
+                    <mat-icon>videocam</mat-icon>
+                  </button>
+                  <button type="button" mat-icon-button class="insert-type-btn youtube" (click)="addBlock('youtube', i + 1)" [matTooltip]="labels.addYoutubeTooltip">
+                    <mat-icon>smart_display</mat-icon>
+                  </button>
+                  <button type="button" mat-icon-button class="insert-type-btn link" (click)="addBlock('link', i + 1)" [matTooltip]="labels.addLinkTooltip">
+                    <mat-icon>link</mat-icon>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
